@@ -1,7 +1,7 @@
 import { AbsoluteFill, Img, OffthreadVideo, Sequence, continueRender, delayRender, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { useState } from 'react';
 
-export type Lamina = { tipo: 'portada' | 'punto'; titulo: string; pill?: string; num?: string; texto?: string; lista?: string[]; nota?: string; svg?: string; fondo?: string; imagen?: string; video?: string; credito?: string; etiqueta?: string };
+export type Lamina = { tipo: 'portada' | 'punto'; titulo: string; pill?: string; num?: string; texto?: string; lista?: string[]; nota?: string; svg?: string; fondo?: string; imagen?: string; video?: string; credito?: string; etiqueta?: string; duracion?: number };
 export type Post = { id: string; fondo: string; slides: Lamina[] };
 
 const C = { navy: '#0B1B2B', suave: '#C9D3DE', naranja: '#FF7A1A' };
@@ -10,6 +10,7 @@ export const TRANSICION = 12; // cuadros de fundido entre láminas
 
 // Tiempo en pantalla: lo justo para leer cada lámina.
 export const duracionLamina = (s: Lamina) => {
+  if (s.duracion) return Math.round(s.duracion * FPS);
   if (s.tipo === 'portada') return Math.round(3 * FPS);
   const palabras = [s.titulo, s.texto, ...(s.lista ?? []), s.nota].join(' ').replace(/<[^>]+>/g, '').split(/\s+/).length;
   return Math.round(Math.min(8, Math.max(4, 1.2 + palabras / 4)) * FPS);
