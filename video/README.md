@@ -15,6 +15,7 @@ npm run estudio   # abre el editor visual de Remotion en el navegador para ver y
 - Fondo con zoom lento y fundido entre láminas. Barra de progreso naranja arriba.
 - El tiempo de cada lámina se calcula según cuánto texto tiene (4 a 8 s).
 - El texto queda dentro de la zona segura (no lo tapan los botones de Instagram/TikTok).
+- Foto de referencia opcional por lámina: en `lote.json` se agrega `"imagen": "archivo.jpg"` (la foto va en la misma carpeta del lote) y, si corresponde, `"credito": "Autor / licencia"`. Aparece en un recuadro con borde naranja y la marca "IMAGEN REFERENCIAL".
 - Sin audio: la música se agrega en la app (audio en tendencia) o se suma después.
 
 `render.mjs` usa el Chromium del entorno de Claude; en otro computador se borra la opción `--browser-executable`.
