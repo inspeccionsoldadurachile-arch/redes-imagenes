@@ -1,10 +1,11 @@
 import { AbsoluteFill, Img, OffthreadVideo, Sequence, continueRender, delayRender, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { useState } from 'react';
 
-export type Lamina = { tipo: 'portada' | 'punto'; titulo: string; pill?: string; num?: string; texto?: string; lista?: string[]; nota?: string; svg?: string; fondo?: string; imagen?: string; video?: string; credito?: string; etiqueta?: string; duracion?: number };
+export type Lamina = { tipo: 'portada' | 'punto'; titulo: string; pill?: string; num?: string; texto?: string; lista?: string[]; nota?: string; svg?: string; fondo?: string; imagen?: string; video?: string; credito?: string; etiqueta?: string; duracion?: number;
+  aspecto?: string; marcas?: { x: number; y: number; w: number; h: number; texto?: string }[] };
 export type Post = { id: string; fondo: string; slides: Lamina[] };
 
-const C = { navy: '#0B1B2B', suave: '#C9D3DE', naranja: '#FF7A1A' };
+const C = { navy: '#0B1B2B', suave: '#C9D3DE', naranja: '#FF7A1A', amarillo: '#FFC400' };
 const FPS = 30;
 export const TRANSICION = 12; // cuadros de fundido entre láminas
 
@@ -69,12 +70,22 @@ const LaminaVideo = ({ s, post, dur }: { s: Lamina; post: Post; dur: number }) =
             </div>); })}
         </div>}
         {s.svg && <Html html={s.svg} style={{ ...sube(sig()), marginTop: 'auto', display: 'flex', justifyContent: 'center' }} />}
-        {(s.imagen || s.video) && !portada && (() => { const x = sig(); return (
-          <div style={{ ...sube(x), flex: '1 1 0', minHeight: 320, maxHeight: 640, marginTop: 48, position: 'relative', borderRadius: 22, overflow: 'hidden', border: `5px solid ${C.naranja}`, boxShadow: '0 20px 50px rgba(0,0,0,.5)' }}>
-            {s.video
-              ? <OffthreadVideo muted src={staticFile(`img/${s.video}`)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : <Img src={staticFile(`img/${s.imagen}`)} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${interpolate(f, [0, dur], [1.12, 1])})` }} />}
-            <div style={{ position: 'absolute', left: 18, bottom: 16, background: 'rgba(6,16,28,.8)', fontSize: 22, fontWeight: 700, letterSpacing: 0.6, padding: '8px 14px', borderRadius: 8, color: C.suave }}>
+        {(s.imagen || s.video) && !portada && (() => { const x = sig(); const t0 = d; const fijo = !!s.marcas?.length; return (
+          <div style={{ ...sube(x), ...(fijo ? { aspectRatio: s.aspecto ?? '16/9' } : { flex: '1 1 0', minHeight: 320, maxHeight: 640 }), marginTop: 48, position: 'relative', borderRadius: 22, overflow: 'hidden', border: `5px solid ${C.naranja}`, boxShadow: '0 20px 50px rgba(0,0,0,.5)' }}>
+            <div style={{ position: 'absolute', inset: 0, transform: s.video ? undefined : `scale(${interpolate(f, [0, dur], [fijo ? 1.06 : 1.12, 1])})` }}>
+              {s.video
+                ? <OffthreadVideo muted src={staticFile(`img/${s.video}`)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <Img src={staticFile(`img/${s.imagen}`)} style={{ width: '100%', height: '100%', objectFit: fijo ? 'fill' : 'cover' }} />}
+              {/* Recuadros sobre las indicaciones (coordenadas en % de la foto, que debe tener la proporción de "aspecto") */}
+              {s.marcas?.map((m, i) => { const v = entra(t0 + 20 + i * 8); const pulso = 1 + 0.03 * Math.sin((f - t0) / 6);
+                return (
+                <div key={i} style={{ position: 'absolute', left: `${m.x}%`, top: `${m.y}%`, width: `${m.w}%`, height: `${m.h}%`, opacity: v,
+                  transform: `scale(${(1.6 - 0.6 * v) * (v > 0.98 ? pulso : 1)})`, border: `6px solid ${C.amarillo}`, borderRadius: 14,
+                  boxShadow: `0 0 0 3px rgba(6,16,28,.65), 0 0 24px ${C.amarillo}` }}>
+                  {i === 0 && <div style={{ position: 'absolute', left: -6, bottom: '100%', marginBottom: 8, background: C.amarillo, color: C.navy, fontWeight: 800, fontSize: 24, letterSpacing: 0.6, padding: '6px 12px', borderRadius: 8, whiteSpace: 'nowrap' }}>{m.texto ?? 'INDICACIÓN'}</div>}
+                </div>); })}
+            </div>
+            <div style={{ position: 'absolute', ...(fijo ? { right: 18, top: 16 } : { left: 18, bottom: 16 }), background: 'rgba(6,16,28,.8)', fontSize: 22, fontWeight: 700, letterSpacing: 0.6, padding: '8px 14px', borderRadius: 8, color: C.suave }}>
               {s.etiqueta ?? 'IMAGEN REFERENCIAL'}{s.credito ? ` · ${s.credito}` : ''}</div>
           </div>); })()}
         {s.nota && <Html html={s.nota} style={{ ...sube(sig()), marginTop: s.imagen || s.video ? 32 : 'auto', background: 'rgba(255,255,255,.08)', borderLeft: `9px solid ${C.naranja}`, padding: '28px 32px', fontSize: 36, lineHeight: 1.4, color: C.suave, borderRadius: 8 }} />}
