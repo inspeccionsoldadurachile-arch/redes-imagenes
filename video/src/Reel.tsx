@@ -1,7 +1,7 @@
-import { AbsoluteFill, Img, Sequence, continueRender, delayRender, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Img, OffthreadVideo, Sequence, continueRender, delayRender, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { useState } from 'react';
 
-export type Lamina = { tipo: 'portada' | 'punto'; titulo: string; pill?: string; num?: string; texto?: string; lista?: string[]; nota?: string; svg?: string; fondo?: string; imagen?: string; credito?: string };
+export type Lamina = { tipo: 'portada' | 'punto'; titulo: string; pill?: string; num?: string; texto?: string; lista?: string[]; nota?: string; svg?: string; fondo?: string; imagen?: string; video?: string; credito?: string; etiqueta?: string };
 export type Post = { id: string; fondo: string; slides: Lamina[] };
 
 const C = { navy: '#0B1B2B', suave: '#C9D3DE', naranja: '#FF7A1A' };
@@ -44,7 +44,9 @@ const LaminaVideo = ({ s, post, dur }: { s: Lamina; post: Post; dur: number }) =
 
   return (
     <AbsoluteFill style={{ opacity: opacidad }}>
-      <AbsoluteFill style={{ backgroundImage: `url(${staticFile(`fondo-${s.fondo || post.fondo}.png`)})`, backgroundSize: 'cover', backgroundPosition: 'center', transform: `scale(${zoom})` }} />
+      {portada && s.video
+        ? <OffthreadVideo muted src={staticFile(`img/${s.video}`)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        : <AbsoluteFill style={{ backgroundImage: `url(${staticFile(`fondo-${s.fondo || post.fondo}.png`)})`, backgroundSize: 'cover', backgroundPosition: 'center', transform: `scale(${zoom})` }} />}
       <AbsoluteFill style={{ background: portada
         ? 'linear-gradient(180deg,rgba(6,16,28,.8) 0%,rgba(6,16,28,.35) 40%,rgba(6,16,28,.2) 65%,rgba(6,16,28,.7) 100%)'
         : 'linear-gradient(180deg,rgba(6,16,28,.93) 0%,rgba(6,16,28,.86) 60%,rgba(6,16,28,.93) 100%)' }} />
@@ -66,13 +68,15 @@ const LaminaVideo = ({ s, post, dur }: { s: Lamina; post: Post; dur: number }) =
             </div>); })}
         </div>}
         {s.svg && <Html html={s.svg} style={{ ...sube(sig()), marginTop: 'auto', display: 'flex', justifyContent: 'center' }} />}
-        {s.imagen && !portada && (() => { const x = sig(); return (
+        {(s.imagen || s.video) && !portada && (() => { const x = sig(); return (
           <div style={{ ...sube(x), flex: '1 1 0', minHeight: 320, maxHeight: 640, marginTop: 48, position: 'relative', borderRadius: 22, overflow: 'hidden', border: `5px solid ${C.naranja}`, boxShadow: '0 20px 50px rgba(0,0,0,.5)' }}>
-            <Img src={staticFile(`img/${s.imagen}`)} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${interpolate(f, [0, dur], [1.12, 1])})` }} />
+            {s.video
+              ? <OffthreadVideo muted src={staticFile(`img/${s.video}`)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : <Img src={staticFile(`img/${s.imagen}`)} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${interpolate(f, [0, dur], [1.12, 1])})` }} />}
             <div style={{ position: 'absolute', left: 18, bottom: 16, background: 'rgba(6,16,28,.8)', fontSize: 22, fontWeight: 700, letterSpacing: 0.6, padding: '8px 14px', borderRadius: 8, color: C.suave }}>
-              IMAGEN REFERENCIAL{s.credito ? ` · ${s.credito}` : ''}</div>
+              {s.etiqueta ?? 'IMAGEN REFERENCIAL'}{s.credito ? ` · ${s.credito}` : ''}</div>
           </div>); })()}
-        {s.nota && <Html html={s.nota} style={{ ...sube(sig()), marginTop: s.imagen ? 32 : 'auto', background: 'rgba(255,255,255,.08)', borderLeft: `9px solid ${C.naranja}`, padding: '28px 32px', fontSize: 36, lineHeight: 1.4, color: C.suave, borderRadius: 8 }} />}
+        {s.nota && <Html html={s.nota} style={{ ...sube(sig()), marginTop: s.imagen || s.video ? 32 : 'auto', background: 'rgba(255,255,255,.08)', borderLeft: `9px solid ${C.naranja}`, padding: '28px 32px', fontSize: 36, lineHeight: 1.4, color: C.suave, borderRadius: 8 }} />}
       </div>
     </AbsoluteFill>
   );

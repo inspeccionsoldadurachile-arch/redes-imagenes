@@ -16,6 +16,9 @@ npm run estudio   # abre el editor visual de Remotion en el navegador para ver y
 - El tiempo de cada lámina se calcula según cuánto texto tiene (4 a 8 s).
 - El texto queda dentro de la zona segura (no lo tapan los botones de Instagram/TikTok).
 - Foto de referencia opcional por lámina: en `lote.json` se agrega `"imagen": "archivo.jpg"` (la foto va en la misma carpeta del lote) y, si corresponde, `"credito": "Autor / licencia"`. Aparece en un recuadro con borde naranja y la marca "IMAGEN REFERENCIAL".
+- `"etiqueta"` cambia el texto del recuadro (por defecto "IMAGEN REFERENCIAL"; para fotos propias, "FOTO DE TERRENO").
+- Si el Reel lleva fotos distintas al carrusel, se arma un JSON aparte (ej. `reel-lun-metodos-ndt.json`) y se pasa como tercer argumento: `npm run video -- <carpeta> <id> reel-lun-metodos-ndt.json`.
+- En vez de foto se puede usar `"video": "clip.mp4"` (se muestra sin audio; conviene que dure al menos lo mismo que la lámina). En la portada, el video reemplaza la foto de fondo.
 - Sin audio: la música se agrega en la app (audio en tendencia) o se suma después.
 
 `render.mjs` usa el Chromium del entorno de Claude; en otro computador se borra la opción `--browser-executable`.
